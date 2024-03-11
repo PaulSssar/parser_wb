@@ -3,7 +3,7 @@ import logging
 
 from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery, Message
-from config import URL
+from config import URL, TIME_NOTIFICATION
 from db.db import get_data_from_db
 from handlers.fsm import SUBSCRIBE
 from handlers.utils import parse_data, request_get
@@ -55,7 +55,7 @@ async def subscribe(callback_data: CallbackQuery, bot: Bot):
                                        f'/subscribe, {article}'
                                    )
                                    )
-        await asyncio.sleep(10)
+        await asyncio.sleep(TIME_NOTIFICATION)
 
 
 @router.message(F.text == '/stop')
