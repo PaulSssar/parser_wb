@@ -15,7 +15,6 @@ router = Router()
 @router.message(F.text == '/db')
 async def get_last_data(message: Message):
     products = await get_data_from_db(5, message.from_user.id)
-    logging.info(f'products {products}')
     for product in products:
         logging.info(f'1prod{product}')
         await message.answer(
@@ -32,9 +31,9 @@ async def get_last_data(message: Message):
 @router.callback_query(F.data.startswith('/subscribe'))
 async def subscribe(callback_data: CallbackQuery, bot: Bot):
     article_of_product = callback_data.data.split(', ')[-1]
-    logging.info(f'{article_of_product} ARTICLE')
     chat_id = callback_data.from_user.id
     SUBSCRIBE[f'chat_id {article_of_product}'] = True
+
     await bot.send_message(
         chat_id,
         text='Вы успешно подписались на товар')
@@ -42,19 +41,27 @@ async def subscribe(callback_data: CallbackQuery, bot: Bot):
         for key in SUBSCRIBE.keys():
             article_url = key.split(' ')[-1]
             data = await request_get(URL + article_url)
-            logging.info(URL + article_url)
-            logging.info(data)
             name, article, rating, count, price = await parse_data(
                 data, callback_data.from_user.id)
-            await bot.send_message(chat_id=callback_data.from_user.id,
-                                   text=f'Название: {name}\nАртикул: {article}\n'
-                                        f'Рейтинг: {rating}\nКоличество на складах: {count}\n'
-                                        f'Цена: {price}',
-                                   reply_markup=await build_keyboard_inline(
-                                       'Подписаться',
-                                       f'/subscribe, {article}'
-                                   )
-                                   )
+            products = await get_data_from_db(
+                1,
+                callback_data.from_user.id,
+                int(article))
+            logging.info(f'PROD {products}')
+            product = products[0]
+            logging.info(product.name)
+            logging.info(f'{price} {product.price}')
+            if price < product.price:
+                await bot.send_message(chat_id=callback_data.from_user.id,
+                                       text=f'Цена снижена с {product.price} до {price}'
+                                            f'Название: {name}\nАртикул: {article}\n'
+                                            f'Рейтинг: {rating}\nКоличество на складах: {count}\n'
+                                            f'Цена: {price}',
+                                       reply_markup=await build_keyboard_inline(
+                                           'Подписаться',
+                                           f'/subscribe, {article}'
+                                       )
+                                       )
         await asyncio.sleep(TIME_NOTIFICATION)
 
 

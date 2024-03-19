@@ -9,4 +9,4 @@ COMMANDS = [BotCommand(command='/start',
             ]
 
 URL = 'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=30&nm='
-TIME_NOTIFICATION = 300
+TIME_NOTIFICATION = 10

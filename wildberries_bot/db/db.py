@@ -56,14 +56,20 @@ async def save_data_to_postgres(name,
         await connect.commit()
 
 
-async def get_data_from_db(count, user_id):
-    query = select(Product).filter(
-        Product.user_id == user_id).order_by(
-        Product.id.desc()).limit(count)
+async def get_data_from_db(count, user_id, product_id=False):
+    if product_id:
+        query = select(Product).filter(
+            Product.user_id == user_id,
+            Product.article == product_id).order_by(
+            Product.id.desc()).limit(count)
+        logging.info(product_id)
+    else:
+        query = select(Product).filter(
+            Product.user_id == user_id).order_by(
+            Product.id.desc()).limit(count)
     async with session.begin() as connection:
         result = await connection.execute(query)
         products = result.scalars().all()
-        logging.info(f'res {products}')
         return products
 
 
